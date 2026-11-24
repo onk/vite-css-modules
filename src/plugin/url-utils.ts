@@ -8,6 +8,14 @@ export const cleanUrl = (url: string) => (
 		: url
 );
 
+// Same as `removeDirectQuery` in Vite
+// https://github.com/vitejs/vite/blob/v8.3.8/packages/vite/src/node/utils.ts
+const directRequestRE = /(\?|&)direct=?(?:&|$)/;
+const trailingSeparatorRE = /[?&]$/;
+export const removeDirectQuery = (url: string) => (
+	url.replace(directRequestRE, '$1').replace(trailingSeparatorRE, '')
+);
+
 export const slash = (filePath: string) => filePath.replaceAll('\\', '/');
 
 export const getCssModuleUrl = (url: string) => {

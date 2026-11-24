@@ -16,7 +16,7 @@ import { supportsArbitraryModuleNamespace } from './supports-arbitrary-module-na
 import type { transform as PostcssTransform } from './transformers/postcss/index.js';
 import type { transform as LightningcssTransform } from './transformers/lightningcss.js';
 import {
-	getCssModuleUrl, cleanUrl, cssModuleRE, slash,
+	getCssModuleUrl, cleanUrl, removeDirectQuery, cssModuleRE, slash,
 } from './url-utils.js';
 
 export const pluginName = 'vite:css-modules';
@@ -253,8 +253,10 @@ export const cssModules = (
 					/**
 					 * Relative path from project root to get stable CSS modules hash
 					 * https://github.com/vitejs/vite/blob/57463fc53fedc8f29e05ef3726f156a6daf65a94/packages/vite/src/node/plugins/css.ts#L2690
+					 *
+					 * `?direct` is removed so that CSS requested via <link> gets the same hash
 					 */
-					slash(cleanUrl(path.relative(config.root, id))),
+					slash(cleanUrl(path.relative(config.root, removeDirectQuery(id)))),
 					isLightningCss ? lightningCssOptions : cssModuleConfig,
 					devSourcemap,
 				);

@@ -150,6 +150,35 @@ export const getViteDevCode = async (
 	},
 );
 
+export const getViteDevCss = async (
+	fixturePath: string,
+	config: InlineConfig,
+	cssPath: string,
+) => await viteServe(
+	fixturePath,
+	config,
+	async (url) => {
+		const cssUrl = new URL(cssPath, url);
+		const fetchText = async (request: URL, headers?: Record<string, string>) => {
+			const response = await fetch(request, { headers });
+			return await response.text();
+		};
+
+		const [imported, linked] = await Promise.all([
+			// Imported from JS
+			fetchText(new URL('?import', cssUrl)),
+
+			// Requested via <link rel="stylesheet">, which Vite handles as `?direct`
+			fetchText(cssUrl, { accept: 'text/css' }),
+		]);
+
+		return {
+			imported,
+			linked,
+		};
+	},
+);
+
 export const viteDevBrowser = async (
 	fixturePath: string,
 	viteConfig: InlineConfig,

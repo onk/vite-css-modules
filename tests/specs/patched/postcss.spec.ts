@@ -12,7 +12,9 @@ import * as vite from 'vite';
 import { patchCssModules } from '#vite-css-modules';
 import { base64Module } from '../../utils/base64-module.ts';
 import * as fixtures from '../../fixtures.ts';
-import { viteBuild, getViteDevCode, viteDevBrowser } from '../../utils/vite.ts';
+import {
+	viteBuild, getViteDevCode, getViteDevCss, viteDevBrowser,
+} from '../../utils/vite.ts';
 import { getCssSourceMaps } from '../../utils/get-css-source-maps.ts';
 
 const usesRolldown = 'rolldownVersion' in vite;
@@ -1742,6 +1744,23 @@ export default {
 			},
 		});
 		expect(css).toMatch('style.module.css?some-query');
+	});
+
+	test('direct request has the same class names as import', async () => {
+		await using fixture = await createFixture(fixtures.exportModeBoth);
+
+		const { imported, linked } = await getViteDevCss(
+			fixture.path,
+			{
+				plugins: [
+					patchCssModules(),
+				],
+			},
+			'/style.module.css',
+		);
+
+		const [className] = linked.match(/\._class_[\w-]+/)!;
+		expect(imported).toMatch(className);
 	});
 
 	test('hmr', async () => {
